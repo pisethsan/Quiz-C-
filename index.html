@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Chosen Palette: Red & Blue -->
+    <!-- Application Structure Plan: The application is structured as a single-page interactive quiz. The core design is a thematic layout where questions are grouped by topic (e.g., C++ Basics, OOP, Excel Formulas) rather than the linear order in the PDF. This allows users to focus their learning on specific areas. The user flow is: 1. Select a topic from the main menu. 2. Answer the questions within that topic. 3. Submit the quiz to see immediate feedback for each question (correct/incorrect highlighting). 4. View a results summary with a dynamic bar chart showing the score for that topic. This structure was chosen to transform a static PDF into an active learning tool, providing a more organized, engaging, and measurable educational experience. -->
+    <!-- Visualization & Content Choices: Report Info: The PDF contains 108 quiz questions on various topics. Goal: Create an interactive learning and assessment tool. Viz/Presentation Method: Questions are presented in interactive cards with multiple-choice options. A dynamic bar chart (Chart.js) is used to visualize the user's score after each quiz section. Interaction: Users click on radio buttons to select answers and a "Submit" button to check their results. The UI provides immediate visual feedback (blue for correct, red for incorrect). Justification: This approach turns passive reading into active participation, which is more effective for learning. The chart provides a clear, quantitative summary of performance, helping users track their progress. Library/Method: Vanilla JS for quiz logic, Tailwind CSS for styling, and Chart.js for the results visualization. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+</head>
+<body class="antialiased">
+    <div id="timer-container" class="fixed top-4 right-4 bg-white p-3 rounded-lg shadow-md z-10 hidden">
+        <p class="text-lg font-semibold">Time Left: <span id="timer" class="text-blue-600 w-20 inline-block">60:00</span></p>
+    </div>
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold">Interactive Programming & Logic Quiz</h1>
+            <p class="mt-2 text-lg text-gray-600">Test your knowledge based on the provided materials.</p>
+        </header>
+
+        <nav id="category-nav" class="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8">
+        </nav>
+
+        <main id="quiz-container">
+            <div id="welcome-message" class="text-center p-8 bg-white rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold mb-2 text-gray-800">Welcome!</h2>
+                <p>Please select a category above to start the quiz. You will have 1 hour to complete each section. Good luck!</p>
+            </div>
+        </main>
+
+        <div id="results-container" class="hidden text-center mt-8">
+            <h2 class="text-3xl font-bold mb-4">Quiz Results</h2>
+            <p id="score-text" class="text-xl mb-4"></p>
+            <div class="chart-container">
+                <canvas id="resultsChart"></canvas>
+            </div>
+            <button id="restart-quiz" class="mt-8 btn-primary font-bold py-2 px-6 rounded-lg">Try Another Category</button>
+        </div>
+    </div>
+    
+    <div id="time-up-modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+            <h3 class="text-2xl font-bold mb-4">Time's Up!</h3>
+            <p class="text-gray-600 mb-6">Your quiz will be submitted automatically.</p>
+            <button id="close-modal-btn" class="btn-primary font-bold py-2 px-6 rounded-lg">OK</button>
+        </div>
+    </div>
+
+
+<script src="quiz.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
