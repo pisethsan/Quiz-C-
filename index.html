@@ -35,13 +35,18 @@
             </div>
         </main>
 
-        <div id="results-container" class="hidden text-center mt-8">
-            <h2 class="text-3xl font-bold mb-4">Quiz Results</h2>
-            <p id="score-text" class="text-xl mb-4"></p>
-            <div class="chart-container">
-                <canvas id="resultsChart"></canvas>
+        <div id="results-container" class="hidden mt-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold mb-4">Quiz Results</h2>
+                <p id="score-text" class="text-xl mb-4"></p>
+                <div class="chart-container">
+                    <canvas id="resultsChart"></canvas>
+                </div>
             </div>
-            <button id="restart-quiz" class="mt-8 btn-primary font-bold py-2 px-6 rounded-lg">Try Another Category</button>
+            <div id="answer-summary" class="mt-12"></div>
+            <div class="text-center">
+                <button id="restart-quiz" class="mt-8 btn-primary font-bold py-2 px-6 rounded-lg">Try Another Category</button>
+            </div>
         </div>
     </div>
     
@@ -52,10 +57,6 @@
             <button id="close-modal-btn" class="btn-primary font-bold py-2 px-6 rounded-lg">OK</button>
         </div>
     </div>
-
-
-<script src="quiz.js"></script>
-<script src="script.js"></script>
-
 </body>
+<script src="quiz.js"></script>
 </html>

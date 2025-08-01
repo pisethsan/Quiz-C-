@@ -147,6 +147,7 @@
         const welcomeMessage = document.getElementById('welcome-message');
         const timerContainer = document.getElementById('timer-container');
         const timerEl = document.getElementById('timer');
+        const answerSummaryContainer = document.getElementById('answer-summary');
         
         let currentCategory = null;
         let score = 0;
@@ -236,3 +237,159 @@
             quizContainer.classList.remove('hidden');
             startTimer();
         }
+        
+        function startTimer() {
+            timeLeft = 3600;
+            timerContainer.classList.remove('hidden');
+            if (timerInterval) clearInterval(timerInterval);
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                
+                if (timeLeft <= 10) {
+                    timerEl.classList.add('text-red-500');
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeUp();
+                }
+            }, 1000);
+        }
+
+        function handleTimeUp() {
+            const modal = document.getElementById('time-up-modal');
+            modal.classList.remove('hidden');
+            
+            const closeModal = () => {
+                modal.classList.add('hidden');
+                showResults();
+            };
+
+            document.getElementById('close-modal-btn').onclick = closeModal;
+            setTimeout(closeModal, 4000);
+        }
+
+        function showResults() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerContainer.classList.add('hidden');
+            timerEl.classList.remove('text-red-500');
+
+            const categoryData = quizData.find(cat => cat.category === currentCategory);
+            const questions = categoryData.questions;
+            const form = document.getElementById('quiz-form');
+
+            if (!form) return;
+            
+            answerSummaryContainer.innerHTML = '<h3 class="text-2xl font-bold text-center mb-6 intro-header">Review Your Answers</h3>';
+            const summaryList = document.createElement('div');
+            summaryList.className = 'bg-white rounded-lg shadow-md divide-y divide-gray-200';
+            
+            questions.forEach((q, index) => {
+                const selectedOptionInput = form.elements[`question${index}`];
+                const selectedOption = selectedOptionInput ? selectedOptionInput.value : "Not Answered";
+
+                const questionCard = document.getElementById(`question-${index}`);
+                const labels = questionCard.querySelectorAll('label');
+                
+                let correctAnswerLabel = null;
+                let selectedLabel = null;
+
+                const isCorrect = selectedOption === q.answer;
+                if (isCorrect) {
+                    score++;
+                }
+                
+                let questionText = q.question.replace(/^\d+\.\s*/, '').replace(/^Q\d+\.?\s*/, '');
+                const summaryItem = document.createElement('div');
+                summaryItem.className = 'summary-item p-4';
+                
+                let summaryHTML = `<p class="font-semibold">${index + 1}. ${questionText}</p>`;
+                summaryHTML += `<p class="mt-2 text-sm text-gray-600">Your Answer: <span class="${isCorrect ? 'text-blue-600 font-semibold' : 'text-red-600 font-semibold'}">${selectedOption}</span></p>`;
+                
+                if (!isCorrect) {
+                    summaryHTML += `<p class="mt-1 text-sm text-blue-700">Correct Answer: <span class="font-semibold">${q.answer}</span></p>`;
+                }
+                
+                summaryItem.innerHTML = summaryHTML;
+                summaryList.appendChild(summaryItem);
+            });
+            
+            answerSummaryContainer.appendChild(summaryList);
+            
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if(submitBtn) submitBtn.style.display = 'none';
+
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            const percentage = (score / questions.length) * 100;
+            scoreText.textContent = `You scored ${score} out of ${questions.length} (${percentage.toFixed(1)}%)`;
+
+            renderChart(questions.length);
+        }
+
+        function renderChart(totalQuestions) {
+            const ctx = document.getElementById('resultsChart').getContext('2d');
+            if(chartInstance) {
+                chartInstance.destroy();
+            }
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Correct', 'Incorrect'],
+                    datasets: [{
+                        label: 'Your Score',
+                        data: [score, totalQuestions - score],
+                        backgroundColor: [
+                            'rgba(37, 99, 235, 0.6)',
+                            'rgba(239, 68, 68, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(37, 99, 235, 1)',
+                            'rgba(239, 68, 68, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: `Results for: ${currentCategory}`
+                        }
+                    }
+                }
+            });
+        }
+
+        restartQuizBtn.onclick = () => {
+            if (timerInterval) clearInterval(timerInterval);
+            timerContainer.classList.add('hidden');
+            timerEl.classList.remove('text-red-500');
+
+            quizContainer.innerHTML = '';
+            resultsContainer.classList.add('hidden');
+            welcomeMessage.classList.remove('hidden');
+            quizContainer.appendChild(welcomeMessage);
+            quizContainer.classList.remove('hidden');
+            document.querySelectorAll('#category-nav .nav-button').forEach(btn => btn.classList.remove('active'));
+        };
+
+        init();
