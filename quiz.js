@@ -207,11 +207,11 @@
                 
                 const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
 
-                shuffledOptions.forEach(option => {
+                shuffledOptions.forEach((option, optionIndex) => {
                     const optionId = `q${index}_${option.replace(/[^a-zA-Z0-9]/g, '')}`;
                     const optionDiv = document.createElement('div');
                     optionDiv.innerHTML = `
-                        <input type="radio" id="${optionId}" name="question${index}" value="${option}" class="hidden peer">
+                        <input type="radio" id="${optionId}" name="question${index}" value="${option}" class="peer sr-only" ${optionIndex === 0 ? 'required' : ''}>
                         <label for="${optionId}" class="option-label block p-3 rounded-md border border-gray-200 cursor-pointer peer-checked:border-blue-600 peer-checked:ring-2 peer-checked:ring-blue-600">${option}</label>
                     `;
                     optionsContainer.appendChild(optionDiv);
@@ -230,7 +230,28 @@
 
             form.onsubmit = (e) => {
                 e.preventDefault();
-                showResults();
+                
+                // If the form is not valid, show validation messages and highlight the first error.
+                if (!form.checkValidity()) {
+                    form.reportValidity(); // Show browser's validation messages
+
+                    const firstInvalidField = form.querySelector(':invalid');
+                    if (firstInvalidField) {
+                        const questionCard = firstInvalidField.closest('.quiz-card');
+                        if (questionCard) {
+                            // Scroll to the invalid card
+                            questionCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            
+                            // Add a temporary border to highlight it
+                            questionCard.classList.add('border-red-400', 'border-2');
+                            setTimeout(() => {
+                                questionCard.classList.remove('border-red-400', 'border-2');
+                            }, 2500);
+                        }
+                    }
+                    return; // Stop the function here
+                }
+                showResults(); // Only show results if the form is valid
             };
 
             quizContainer.appendChild(form);
@@ -284,19 +305,15 @@
 
             if (!form) return;
             
+            score = 0; // Reset score for recalculation
+
             answerSummaryContainer.innerHTML = '<h3 class="text-2xl font-bold text-center mb-6 intro-header">Review Your Answers</h3>';
             const summaryList = document.createElement('div');
-            summaryList.className = 'bg-white rounded-lg shadow-md divide-y divide-gray-200';
+            summaryList.className = 'space-y-6';
             
             questions.forEach((q, index) => {
                 const selectedOptionInput = form.elements[`question${index}`];
                 const selectedOption = selectedOptionInput ? selectedOptionInput.value : "Not Answered";
-
-                const questionCard = document.getElementById(`question-${index}`);
-                const labels = questionCard.querySelectorAll('label');
-                
-                let correctAnswerLabel = null;
-                let selectedLabel = null;
 
                 const isCorrect = selectedOption === q.answer;
                 if (isCorrect) {
@@ -305,14 +322,31 @@
                 
                 let questionText = q.question.replace(/^\d+\.\s*/, '').replace(/^Q\d+\.?\s*/, '');
                 const summaryItem = document.createElement('div');
-                summaryItem.className = 'summary-item p-4';
+                summaryItem.className = 'quiz-card p-6 rounded-lg';
                 
-                let summaryHTML = `<p class="font-semibold">${index + 1}. ${questionText}</p>`;
-                summaryHTML += `<p class="mt-2 text-sm text-gray-600">Your Answer: <span class="${isCorrect ? 'text-blue-600 font-semibold' : 'text-red-600 font-semibold'}">${selectedOption}</span></p>`;
+                let summaryHTML = `<p class="font-semibold text-lg mb-4">${index + 1}. ${questionText}</p>`;
                 
-                if (!isCorrect) {
-                    summaryHTML += `<p class="mt-1 text-sm text-blue-700">Correct Answer: <span class="font-semibold">${q.answer}</span></p>`;
+                if (q.code) {
+                    summaryHTML += `<code>${q.code.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code>`;
                 }
+
+                summaryHTML += '<div class="mt-4 space-y-3">';
+                q.options.forEach(option => {
+                    let optionClass = 'block p-3 rounded-md border text-sm';
+                    let indicator = '';
+
+                    if (option === q.answer) {
+                        optionClass += ' bg-green-100 border-green-300 text-green-800 font-medium';
+                        indicator = ' &check; Correct Answer';
+                    } else if (option === selectedOption) {
+                        optionClass += ' bg-red-100 border-red-300 text-red-800';
+                        indicator = ' &times; Your Answer';
+                    } else {
+                        optionClass += ' border-gray-200 bg-gray-50 text-gray-700';
+                    }
+                    summaryHTML += `<div class="${optionClass}">${option}${indicator}</div>`;
+                });
+                summaryHTML += '</div>';
                 
                 summaryItem.innerHTML = summaryHTML;
                 summaryList.appendChild(summaryItem);
