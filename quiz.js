@@ -125,7 +125,6 @@
                     { question: "Which of these is a disadvantage of group decision making?", options: ["Higher creativity", "More information available", "Risk of groupthink", "Shared responsibility"], answer: "Risk of groupthink" },
                     { question: "What is intuition-based decision making?", options: ["Based only on data analysis", "Based on feelings and experiences", "Based on voting by a group", "Based on a computer program"], answer: "Based on feelings and experiences" },
                     { question: "Which function can return the relative position of an item?", options: ["INDEX", "MATCH", "OFFSET", "INDIRECT"], answer: "MATCH" },
-                    { question: "Which function can return the relative position of an item?", options: ["INDEX", "MATCH", "OFFSET", "INDIRECT"], answer: "MATCH" },
                     { question: "What does the formula =SUMIF(A1:A10, \">100\", B1:B10) do?", options: ["Sums all cells in A1:A10 greater than 100.", "Sums all cells in B1:B10 where corresponding A1:A10 cells are greater than 100.", "Counts cells in A1:A10 greater than 100.", "Returns an error."], answer: "Sums all cells in B1:B10 where corresponding A1:A10 cells are greater than 100." },
                     { question: "What does the formula =INDEX(A1:A10, MATCH(\"Apple\", B1:B10, 0)) do?", options: ["Finds \"Apple\" in A1:A10 and returns its position.", "Returns the value in A1:A10 that corresponds to the row where \"Apple\" is found in B1:B10.", "Returns \"Apple\" from B1:B10 directly.", "Produces an error."], answer: "Returns the value in A1:A10 that corresponds to the row where \"Apple\" is found in B1:B10." },
                     { question: "Which function allows you to count the number of cells that meet multiple criteria?", options: ["COUNTIF", "COUNTIFS", "COUNTA", "SUMIF"], answer: "COUNTIFS" },
@@ -152,6 +151,7 @@
         let chartInstance = null;
         let timerInterval = null;
         let timeLeft = 3600;
+        let currentQuizQuestions = [];
 
         function init() {
             quizData.forEach(cat => {
@@ -161,6 +161,12 @@
                 button.onclick = () => startQuiz(cat.category);
                 categoryNav.appendChild(button);
             });
+
+            const showAllButton = document.createElement('button');
+            showAllButton.textContent = 'Show All Answers';
+            showAllButton.className = 'nav-button py-2 px-4 rounded-lg text-sm sm:text-base font-medium bg-white border border-gray-200 hover:bg-gray-50';
+            showAllButton.onclick = () => showAllAnswers();
+            categoryNav.appendChild(showAllButton);
         }
 
         function startQuiz(category) {
@@ -171,14 +177,18 @@
             quizContainer.innerHTML = '';
             
             document.querySelectorAll('#category-nav .nav-button').forEach(btn => {
-                btn.classList.remove('active');
+                btn.classList.remove('active'); // Deactivate all buttons first
                 if(btn.textContent === category) {
                     btn.classList.add('active');
                 }
             });
 
             const categoryData = quizData.find(cat => cat.category === category);
-            const questions = categoryData.questions;
+            // Create a new array of questions for the current quiz attempt with shuffled options
+            currentQuizQuestions = categoryData.questions.map(q => ({
+                ...q,
+                shuffledOptions: [...q.options].sort(() => Math.random() - 0.5)
+            }));
 
             const intro = document.createElement('div');
             intro.className = 'text-center mb-8 p-6 bg-white rounded-lg shadow-sm';
@@ -189,7 +199,7 @@
             form.id = 'quiz-form';
             form.className = 'space-y-6';
 
-            questions.forEach((q, index) => {
+            currentQuizQuestions.forEach((q, index) => {
                 const questionCard = document.createElement('div');
                 questionCard.className = 'quiz-card p-6 rounded-lg';
                 questionCard.id = `question-${index}`;
@@ -203,14 +213,13 @@
                 const optionsContainer = document.createElement('div');
                 optionsContainer.className = 'space-y-3 mt-4';
                 
-                const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
-
-                shuffledOptions.forEach((option, optionIndex) => {
+                q.shuffledOptions.forEach((option, optionIndex) => {
+                    const prefix = String.fromCharCode(65 + optionIndex);
                     const optionId = `q${index}_${optionIndex}`;
                     const optionDiv = document.createElement('div');
                     optionDiv.innerHTML = `
                         <input type="radio" id="${optionId}" name="question${index}" value="${option}" class="peer sr-only" ${optionIndex === 0 ? 'required' : ''}>
-                        <label for="${optionId}" class="option-label block p-3 rounded-md border border-gray-200 cursor-pointer peer-checked:border-blue-600 peer-checked:ring-2 peer-checked:ring-blue-600">${option}</label>
+                        <label for="${optionId}" class="option-label block p-3 rounded-md border border-gray-200 cursor-pointer peer-checked:border-blue-600 peer-checked:ring-2 peer-checked:ring-blue-600">${prefix}. ${option}</label>
                     `;
                     optionsContainer.appendChild(optionDiv);
                 });
@@ -292,13 +301,71 @@
             setTimeout(closeModal, 4000);
         }
 
+        function showAllAnswers() {
+            // Deactivate any active category buttons and activate the "Show All" button
+            document.querySelectorAll('#category-nav .nav-button').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent === 'Show All Answers') {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Hide other containers and stop the timer
+            if (timerInterval) clearInterval(timerInterval);
+            timerContainer.classList.add('hidden');
+            welcomeMessage.classList.add('hidden');
+            resultsContainer.classList.add('hidden');
+            
+            // Clear and prepare the main container for the answer key
+            quizContainer.innerHTML = '';
+            quizContainer.classList.remove('hidden');
+
+            const reviewHeader = document.createElement('div');
+            reviewHeader.className = 'text-center mb-8 p-6 bg-white rounded-lg shadow-sm';
+            reviewHeader.innerHTML = `<h2 class="text-2xl font-bold intro-header">All Questions & Answers</h2><p class="mt-2 text-gray-600">A complete review of all questions across all categories.</p>`;
+            quizContainer.appendChild(reviewHeader);
+
+            const summaryList = document.createElement('div');
+            summaryList.className = 'space-y-6';
+
+            quizData.forEach(category => {
+                const categoryHeader = document.createElement('h3');
+                categoryHeader.className = 'text-xl font-bold mt-8 mb-4 p-3 bg-gray-100 rounded-md';
+                categoryHeader.textContent = category.category;
+                summaryList.appendChild(categoryHeader);
+
+                category.questions.forEach((q, index) => {
+                    let questionText = q.question.replace(/^\d+\.\s*/, '').replace(/^Q\d+\.?\s*/, '');
+                    const summaryItem = document.createElement('div');
+                    summaryItem.className = 'quiz-card p-6 rounded-lg';
+                    
+                    let summaryHTML = `<p class="font-semibold text-lg mb-4">${index + 1}. ${questionText}</p>`;
+                    if (q.code) {
+                        summaryHTML += `<code>${q.code.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code>`;
+                    }
+
+                    summaryHTML += '<div class="mt-4 space-y-3">';
+                    q.options.forEach((option, optionIndex) => {
+                        const prefix = String.fromCharCode(65 + optionIndex);
+                        const isCorrect = option === q.answer;
+                        const optionClass = isCorrect ? 'bg-green-100 border-green-300 text-green-800 font-medium' : 'border-gray-200 bg-gray-50 text-gray-700';
+                        const indicator = isCorrect ? ' &check; Correct Answer' : '';
+                        summaryHTML += `<div class="block p-3 rounded-md border text-sm ${optionClass}">${prefix}. ${option}${indicator}</div>`;
+                    });
+                    summaryHTML += '</div>';
+                    
+                    summaryItem.innerHTML = summaryHTML;
+                    summaryList.appendChild(summaryItem);
+                });
+            });
+
+            quizContainer.appendChild(summaryList);
+        }
+
         function showResults() {
             if (timerInterval) clearInterval(timerInterval);
             timerContainer.classList.add('hidden');
             timerEl.classList.remove('text-red-500');
-
-            const categoryData = quizData.find(cat => cat.category === currentCategory);
-            const questions = categoryData.questions;
             const form = document.getElementById('quiz-form');
 
             if (!form) return;
@@ -309,7 +376,7 @@
             const summaryList = document.createElement('div');
             summaryList.className = 'space-y-6';
             
-            questions.forEach((q, index) => {
+            currentQuizQuestions.forEach((q, index) => {
                 const selectedOptionInput = form.elements[`question${index}`];
                 const selectedOption = selectedOptionInput ? selectedOptionInput.value : "Not Answered";
 
@@ -329,8 +396,9 @@
                 }
 
                 summaryHTML += '<div class="mt-4 space-y-3">';
-                q.options.forEach(option => {
+                q.shuffledOptions.forEach((option, optionIndex) => {
                     let optionClass = 'block p-3 rounded-md border text-sm';
+                    const prefix = String.fromCharCode(65 + optionIndex);
                     let indicator = '';
 
                     if (option === q.answer) {
@@ -342,7 +410,7 @@
                     } else {
                         optionClass += ' border-gray-200 bg-gray-50 text-gray-700';
                     }
-                    summaryHTML += `<div class="${optionClass}">${option}${indicator}</div>`;
+                    summaryHTML += `<div class="${optionClass}">${prefix}. ${option}${indicator}</div>`;
                 });
                 summaryHTML += '</div>';
                 
@@ -358,10 +426,10 @@
             quizContainer.classList.add('hidden');
             resultsContainer.classList.remove('hidden');
 
-            const percentage = (score / questions.length) * 100;
-            scoreText.textContent = `You scored ${score} out of ${questions.length} (${percentage.toFixed(1)}%)`;
+            const percentage = (score / currentQuizQuestions.length) * 100;
+            scoreText.textContent = `You scored ${score} out of ${currentQuizQuestions.length} (${percentage.toFixed(1)}%)`;
 
-            renderChart(questions.length);
+            renderChart(currentQuizQuestions.length);
         }
 
         function renderChart(totalQuestions) {
