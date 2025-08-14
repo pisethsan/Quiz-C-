@@ -330,7 +330,7 @@
 
             quizData.forEach(category => {
                 const categoryHeader = document.createElement('h3');
-                categoryHeader.className = 'text-xl font-bold mt-8 mb-4 p-3 bg-gray-100 rounded-md';
+                categoryHeader.className = 'category-title';
                 categoryHeader.textContent = category.category;
                 summaryList.appendChild(categoryHeader);
 

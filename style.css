@@ -1,69 +1,214 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;500;700;800&display=swap');
+
+/* 1. CSS Variables & Root Styles */
+:root {
+    --bg-color: #f1f5f9; /* slate-100 */
+    --card-bg: #ffffff; /* white */
+    --text-primary: #1e293b; /* slate-800 */
+    --text-secondary: #475569; /* slate-600 */
+    --border-color: #e2e8f0; /* slate-200 */
+    --accent-color: #4f46e5; /* indigo-600 */
+    --accent-color-hover: #4338ca; /* indigo-700 */
+    --code-bg: #1f2937; /* gray-800 */
+    --code-text: #d1d5db; /* gray-300 */
+    --font-sans: 'Inter', sans-serif;
+    --font-mono: 'Fira Code', monospace;
+}
+
+/* 2. Body & Typography */
 body {
-            font-family: 'Inter', sans-serif;
-            background-color: #eff6ff;
-            color: #1f2937;
-        }
-        h1, .intro-header {
-            color: #1e40af;
-        }
-        .quiz-card {
-            background-color: #ffffff;
-            border: 1px solid #dbeafe;
-            transition: box-shadow 0.3s ease;
-        }
-        .quiz-card:hover {
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        .option-label {
-            transition: background-color 0.3s ease;
-        }
-        .option-label:hover {
-            background-color: #eef2ff;
-        }
-        .correct {
-            background-color: #dbeafe !important;
-            border-left: 4px solid #2563eb;
-        }
-        .incorrect {
-            background-color: #fee2e2 !important;
-            border-left: 4px solid #ef4444;
-        }
-        .correct-answer-text {
-            color: #1e40af;
-            font-weight: 500;
-        }
-        .btn-primary {
-            background-color: #2563eb;
-            color: white;
-            transition: background-color 0.3s ease;
-        }
-        .btn-primary:hover {
-            background-color: #1d4ed8;
-        }
-        .nav-button.active {
-            background-color: #2563eb;
-            color: white;
-            font-weight: 600;
-        }
-        .nav-button {
-            transition: all 0.3s ease;
-        }
-        code {
-            background-color: #eef2ff;
-            border-radius: 6px;
-            padding: 1em;
-            display: block;
-            white-space: pre-wrap;
-            color: #1e3a8a;
-            font-size: 0.9em;
-            border: 1px solid #dbeafe;
-        }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 300px;
-            max-height: 400px;
-        }
+    font-family: var(--font-sans);
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1 {
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.intro-header {
+    background: linear-gradient(to right, var(--accent-color), #a855f7); /* indigo-600 to purple-500 */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+}
+
+/* 3. Navigation */
+.nav-button {
+    background-color: var(--card-bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+}
+
+.nav-button:hover {
+    background-color: #f8fafc; /* slate-50 */
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.nav-button.active {
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    transform: translateY(-2px);
+}
+
+/* 3.5. Category Titles (for All Answers view) */
+.category-title {
+    font-size: 1.5rem; /* 24px */
+    font-weight: 700;
+    color: var(--card-bg);
+    background: linear-gradient(90deg, var(--accent-color) 0%, #a855f7 100%);
+    padding: 0.75rem 1.5rem; /* 12px 24px */
+    border-radius: 0.5rem; /* 8px */
+    margin-top: 2.5rem; /* 40px */
+    margin-bottom: 1.5rem; /* 24px */
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    position: sticky;
+    top: 10px; /* Keeps header visible when scrolling */
+    z-index: 5; /* Ensures it's above questions but below timer */
+}
+
+/* 4. Cards & Content Blocks */
+.quiz-card, #welcome-message, #results-container > div:first-child {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem; /* 12px */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.quiz-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* 5. Options & Interaction */
+.option-label {
+    border: 1px solid var(--border-color);
+    background-color: #f8fafc; /* slate-50 */
+    transition: all 0.2s ease-in-out;
+}
+
+.option-label:hover {
+    border-color: var(--accent-color);
+    background-color: #eef2ff; /* indigo-50 */
+    color: var(--accent-color);
+}
+
+/* This targets the peer-checked state from the JS */
+.peer:checked + .option-label {
+    border-color: var(--accent-color);
+    background-color: #eef2ff; /* indigo-50 */
+    color: var(--accent-color);
+    font-weight: 500;
+    box-shadow: 0 0 0 2px var(--accent-color);
+}
+
+/* 6. Buttons */
+.btn-primary {
+    background-color: var(--accent-color);
+    color: white;
+    font-weight: 700;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-color-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 7px 14px rgba(79, 70, 229, 0.25);
+}
+
+/* 7. Code Blocks */
+code {
+    display: block;
+    background-color: var(--code-bg);
+    color: var(--code-text);
+    font-family: var(--font-mono);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    white-space: pre-wrap;
+    font-size: 0.9em;
+    margin: 1rem 0;
+    border: 1px solid #374151; /* gray-700 */
+}
+
+/* 8. Results & Summary */
+/* The JS applies Tailwind classes directly. We add a left border for emphasis. */
+.bg-green-100 {
+    border-left: 4px solid #22c55e; /* green-500 */
+}
+
+.bg-red-100 {
+    border-left: 4px solid #ef4444; /* red-500 */
+}
+
+/* 9. Timer & Modal */
+#timer-container {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+#timer {
+    color: var(--accent-color);
+    font-weight: 700;
+}
+
+/* 10. Chart Container */
+.chart-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    height: 300px;
+    max-height: 400px;
+    padding: 1rem;
+    background-color: var(--card-bg);
+    border-radius: 0.75rem;
+    margin-top: 2rem;
+}
+
+/* 11. Print Styles */
+@media print {
+    /* Hide elements not needed for the printout */
+    #category-nav, #timer-container {
+        display: none !important;
+    }
+
+    /* Force browsers to print background colors for better readability */
+    .category-title, .bg-green-100, .bg-gray-50, code {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* Reset styles for a cleaner print layout */
+    body {
+        background-color: #fff !important; /* Force white background */
+    }
+
+    .category-title {
+        position: static; /* Disable sticky positioning for print */
+        box-shadow: none;
+    }
+
+    .quiz-card {
+        box-shadow: none;
+        transform: none;
+        page-break-inside: avoid; /* Prevent questions from splitting across pages */
+        border: 1px solid #ddd;
+    }
+}
