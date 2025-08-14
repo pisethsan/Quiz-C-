@@ -35,9 +35,8 @@ h1 {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-fill-color: transparent;
 }
-
+    
 /* 3. Navigation */
 .nav-button {
     background-color: var(--card-bg);
